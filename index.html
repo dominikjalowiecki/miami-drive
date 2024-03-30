@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./assets/styles/styles.css" />
+    <title>Miami Driver</title>
+  </head>
+  <body>
+    <div id="menu" style="display: flex">
+      <h1 class="menu-title">Miami Drive</h1>
+      <div id="menu-main" class="menu-item" style="display: flex">
+        <ul class="menu-list">
+          <li>
+            <button class="menu-btn" data-destination="start-game">
+              Start game<span
+                class="game-loading-spinner"
+                style="display: none"
+              ></span>
+            </button>
+          </li>
+          <li>
+            <button class="menu-btn" data-destination="menu-about">
+              About
+            </button>
+          </li>
+          <li>
+            <button class="menu-btn" data-destination="menu-options">
+              Options
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div id="menu-about" class="menu-item" style="display: none">
+        <ul class="about-text">
+          <li>Up - Jump, Left/Right - Move, G - Horn, Esc - Main menu</li>
+          <li>
+            Control by using the arrows on the keyboard, or by clicking on the
+            left or right half of the screen
+          </li>
+          <li>
+            Avoid moving vehicles on the highway and earn points for the
+            distance travelled
+          </li>
+          <li>
+            The vehicle accelerates with time, so you must show your skills
+          </li>
+        </ul>
+        <ul class="menu-list">
+          <li>
+            <button class="menu-btn" data-destination="menu-main">
+              Return to main menu
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div id="menu-options" class="menu-item" style="display: none">
+        <label id="car-select-label" for="car-select">Choose a car:</label>
+        <select id="car-select">
+          <option value="nissan-skyline-gtr-r-34">
+            Nissan Skyline GTR R-34
+          </option>
+          <option value="volkswagen-golf-gti">Volkswagen Golf GTI</option>
+        </select>
+
+        <ul class="menu-list">
+          <li>
+            <button class="menu-btn" data-destination="menu-main">
+              Return to main menu
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div id="menu-result" class="menu-item" style="display: none">
+        <p class="final-score">
+          Final score: <span id="final-score-text">0</span>
+        </p>
+        <ul class="menu-list">
+          <li>
+            <button class="menu-btn" data-destination="start-game">
+              <span class="game-loading-spinner"></span>
+              Start game
+            </button>
+          </li>
+          <li>
+            <button class="menu-btn" data-destination="menu-main">
+              Return to main menu
+            </button>
+          </li>
+        </ul>
+      </div>
+      <p class="menu-footer">Dominik Jałowiecki & Jakub Fudali &copy; 2024</p>
+    </div>
+    <div id="control-widget" class="widget">
+      <ul>
+        <li class="score">Score: <span id="score-text">0</span></li>
+        <li><button id="main-menu-btn">Main menu</button></li>
+      </ul>
+    </div>
+    <div id="volume-widget" class="widget">
+      <label for="volume-control">Volume</label>
+      <input
+        type="range"
+        id="volume-control"
+        min="0"
+        max="1"
+        value="0.5"
+        step="0.1"
+      />
+    </div>
+    <div id="mobile-control">
+      <div id="left-direction" class="direction"></div>
+      <div id="right-direction" class="direction"></div>
+    </div>
+    <div id="game"></div>
+    <script src="./assets/scripts/three.min.js"></script>
+    <script src="./assets/scripts/GLTF2Loader.js"></script>
+    <script type="module" src="./assets/scripts/main.mjs"></script>
+  </body>
+</html>
