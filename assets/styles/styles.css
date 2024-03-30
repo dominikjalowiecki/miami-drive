@@ -139,6 +139,8 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #mobile-control .direction {
@@ -149,6 +151,8 @@ body {
   opacity: 0.05;
   cursor: pointer;
   transition: opacity 0.3s ease;
+  user-select: inherit;
+  -webkit-tap-highlight-color: inherit;
 }
 
 #mobile-control .direction:hover {
