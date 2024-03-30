@@ -5,6 +5,7 @@ export default class Game {
   #carModels = {
     'nissan-skyline-gtr-r-34': null,
     'volkswagen-golf-gti': null,
+    'ferrari-enzo': null,
   };
   #highwayLanes = [-5.6, 0, 5.6];
   #highway;
@@ -89,6 +90,34 @@ export default class Game {
               model.rotation.x = THREE.Math.degToRad(30);
               model.rotation.y = THREE.Math.degToRad(-180);
               this.#carModels['nissan-skyline-gtr-r-34'] = model;
+              resolve();
+            },
+            undefined,
+            (error) => reject(error)
+          );
+        })
+      );
+    }
+
+    if (this.#carModels['ferrari-enzo'] === null) {
+      promises.push(
+        new Promise((resolve, reject) => {
+          this.#gltfLoader.load(
+            'assets/objects/ferrari_enzo/scene.gltf',
+            (data) => {
+              const model = data.scene;
+              model.traverse((child) => {
+                if (child.isMesh) {
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                }
+              });
+              model.scale.multiplyScalar(1.2);
+              model.position.y = this.#cylinderRadius - 1;
+              model.position.z = 13;
+              model.rotation.x = THREE.Math.degToRad(30);
+              model.rotation.y = THREE.Math.degToRad(0);
+              this.#carModels['ferrari-enzo'] = model;
               resolve();
             },
             undefined,
