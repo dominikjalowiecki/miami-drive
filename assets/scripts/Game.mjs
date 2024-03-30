@@ -36,6 +36,7 @@ export default class Game {
   #camera;
   #renderer;
   #gameStarted = false;
+  #fps = 60;
 
   set score(value) {
     this.#score = value;
@@ -154,7 +155,7 @@ export default class Game {
   start(selectedCar) {
     this.score = 0;
     this.#currentLane = 1;
-    this.#obstacleReleaseInterval = 1;
+    this.#obstacleReleaseInterval = 3;
     this.#selectedCar = selectedCar;
     this.#obstaclesPool = [];
     this.#obstaclesInPath = [];
@@ -230,6 +231,7 @@ export default class Game {
     this.#renderer.setClearColor(0xcdc1c5, 1);
     this.#renderer.shadowMap.enabled = true;
     this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.#renderer.setPixelRatio(window.devicePixelRatio);
     this.#renderer.setSize(this.#sceneWidth, this.#sceneHeight);
 
     this.#gameDiv.appendChild(this.#renderer.domElement);
@@ -297,7 +299,7 @@ export default class Game {
   }
 
   #update() {
-    this.#highway.rotation.x += 0.005 / this.#obstacleReleaseInterval;
+    this.#highway.rotation.x += 0.05 / this.#obstacleReleaseInterval;
 
     const delta = this.#clock.getDelta();
     const interpolationFactor = delta < 0.25 ? delta * 4 : 1;
@@ -319,8 +321,8 @@ export default class Game {
       this.#addPathObstacle();
       this.score = this.#score + 1;
 
-      if (this.#obstacleReleaseInterval > 0.5) {
-        this.#obstacleReleaseInterval -= 0.005;
+      if (this.#obstacleReleaseInterval > 1.5) {
+        this.#obstacleReleaseInterval -= 0.05;
       }
     }
     this.#obstacleLogic();
@@ -328,7 +330,9 @@ export default class Game {
     this.#render();
 
     if (this.#gameStarted) {
-      window.requestAnimationFrame(() => this.#update());
+      setTimeout(() => {
+        window.requestAnimationFrame(() => this.#update());
+      }, 1000 / this.#fps);
     }
   }
 
