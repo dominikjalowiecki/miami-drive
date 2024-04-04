@@ -246,7 +246,7 @@ export default class Game {
     this.#scene.add(this.#sky);
 
     this.#camera = new THREE.PerspectiveCamera(
-      50,
+      65,
       this.#sceneWidth / this.#sceneHeight,
       0.1,
       1000

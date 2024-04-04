@@ -13,6 +13,7 @@ export default class Menu {
   #mobileRightDirection;
   #scoreText;
   #finalScoreText;
+  #bestScoreText;
 
   #sounds = {
     music: null,
@@ -54,6 +55,7 @@ export default class Menu {
     this.#mobileRightDirection = Utils.getElement('#right-direction');
     this.#scoreText = Utils.getElement('#score-text');
     this.#finalScoreText = Utils.getElement('#final-score-text');
+    this.#bestScoreText = Utils.getElement('#best-score-text');
     this.#gameDiv = Utils.getElement('#game');
 
     this.#volumeControl.value = this.#volume;
@@ -164,7 +166,17 @@ export default class Menu {
 
   #handleGameStop() {
     this.#game.stop();
-    this.#finalScoreText.innerHTML = this.#scoreText.innerHTML;
+
+    const scoreText = this.#scoreText.innerHTML;
+    const score = Number(scoreText);
+    let bestScore = localStorage.getItem('miamiDriveBestScore');
+    if (!isNaN(score) && (bestScore === null || Number(bestScore) < score)) {
+      localStorage.setItem('miamiDriveBestScore', score);
+      bestScore = score;
+    }
+
+    this.#finalScoreText.innerHTML = score;
+    this.#bestScoreText.innerHTML = bestScore ?? 0;
     this.#menu.style.display = 'flex';
     this.#navigateMenu('menu-result');
   }
