@@ -21,7 +21,7 @@
     <link rel="prefetch" href="./assets/objects/ferrari_enzo/scene.gltf" />
     <link rel="prefetch" href="./assets/objects/ferrari_enzo/scene.bin" />
     <link rel="prefetch" href="./assets/objects/terrain.glb" />
-    <title>Miami Driver</title>
+    <title>Miami Drive</title>
   </head>
   <body>
     <div id="menu" style="display: flex">
@@ -62,6 +62,10 @@
           <li>
             The vehicle accelerates with time, so you must show your skills
           </li>
+          <li>
+            Improve your best score to unlock new cars with better handling and
+            acceleration
+          </li>
         </ul>
         <ul class="menu-list">
           <li>
@@ -74,11 +78,17 @@
       <div id="menu-options" class="menu-item" style="display: none">
         <label id="car-select-label" for="car-select">Choose a car:</label>
         <select id="car-select">
-          <option value="nissan-skyline-gtr-r-34">
-            Nissan Skyline GTR R-34
-          </option>
           <option value="volkswagen-golf-gti">Volkswagen Golf GTI</option>
-          <option value="ferrari-enzo">Ferrari Enzo</option>
+          <option
+            value="nissan-skyline-gtr-r-34"
+            id="nissan-skyline-gtr-r-34"
+            disabled
+          >
+            30 score to unlock
+          </option>
+          <option value="ferrari-enzo" id="ferrari-enzo" disabled>
+            50 score to unlock
+          </option>
         </select>
 
         <ul class="menu-list">

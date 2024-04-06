@@ -2,10 +2,22 @@ export default class Game {
   #threeLoader;
   #gltfLoader;
   #skyGeoTexture;
-  #carModels = {
-    'nissan-skyline-gtr-r-34': null,
-    'volkswagen-golf-gti': null,
-    'ferrari-enzo': null,
+  #cars = {
+    'nissan-skyline-gtr-r-34': {
+      model: null,
+      speed: 2,
+      steeringRatio: 6,
+    },
+    'volkswagen-golf-gti': {
+      model: null,
+      speed: 1,
+      steeringRatio: 4,
+    },
+    'ferrari-enzo': {
+      model: null,
+      speed: 3,
+      steeringRatio: 8,
+    },
   };
   #highwayLanes = [-5.6, 0, 5.6];
   #highway;
@@ -30,6 +42,9 @@ export default class Game {
   #scene;
   #sky;
   #hero;
+  #carSpeed;
+  #highwayRotationFactor;
+  #carSteeringRatio;
   #cylinderRadius = 24.5;
   #cylindricalHelper;
   #obstaclesPool;
@@ -71,7 +86,7 @@ export default class Game {
       );
     }
 
-    if (this.#carModels['nissan-skyline-gtr-r-34'] === null) {
+    if (this.#cars['nissan-skyline-gtr-r-34'].model === null) {
       promises.push(
         new Promise((resolve, reject) => {
           this.#gltfLoader.load(
@@ -89,7 +104,7 @@ export default class Game {
               model.position.z = 13;
               model.rotation.x = THREE.Math.degToRad(30);
               model.rotation.y = THREE.Math.degToRad(-180);
-              this.#carModels['nissan-skyline-gtr-r-34'] = model;
+              this.#cars['nissan-skyline-gtr-r-34'].model = model;
               resolve();
             },
             undefined,
@@ -99,7 +114,7 @@ export default class Game {
       );
     }
 
-    if (this.#carModels['ferrari-enzo'] === null) {
+    if (this.#cars['ferrari-enzo'].model === null) {
       promises.push(
         new Promise((resolve, reject) => {
           this.#gltfLoader.load(
@@ -117,7 +132,7 @@ export default class Game {
               model.position.z = 13;
               model.rotation.x = THREE.Math.degToRad(30);
               model.rotation.y = THREE.Math.degToRad(0);
-              this.#carModels['ferrari-enzo'] = model;
+              this.#cars['ferrari-enzo'].model = model;
               resolve();
             },
             undefined,
@@ -127,7 +142,7 @@ export default class Game {
       );
     }
 
-    if (this.#carModels['volkswagen-golf-gti'] === null) {
+    if (this.#cars['volkswagen-golf-gti'].model === null) {
       promises.push(
         new Promise((resolve, reject) => {
           this.#gltfLoader.load(
@@ -145,7 +160,7 @@ export default class Game {
               model.position.z = 13;
               model.rotation.x = THREE.Math.degToRad(30);
               model.rotation.y = THREE.Math.degToRad(-180);
-              this.#carModels['volkswagen-golf-gti'] = model;
+              this.#cars['volkswagen-golf-gti'].model = model;
               resolve();
             },
             undefined,
@@ -282,7 +297,7 @@ export default class Game {
   }
 
   #createObstacle() {
-    const obstacleCarModel = this.#carModels['volkswagen-golf-gti'].clone();
+    const obstacleCarModel = this.#cars['volkswagen-golf-gti'].model.clone();
     obstacleCarModel.position.x = 0;
     obstacleCarModel.position.y = 0;
     obstacleCarModel.position.z = 0;
@@ -300,13 +315,19 @@ export default class Game {
 
   #addHero() {
     if (this.#selectedCar === 'volkswagen-golf-gti') {
-      this.#hero = this.#carModels['volkswagen-golf-gti'].clone();
+      this.#hero = this.#cars['volkswagen-golf-gti'].model.clone();
+    } else if (this.#selectedCar === 'ferrari-enzo') {
+      this.#hero = this.#cars['ferrari-enzo'].model.clone();
     } else {
-      this.#hero = this.#carModels[this.#selectedCar];
+      this.#hero = this.#cars[this.#selectedCar].model;
     }
     this.#hero.castShadow = true;
     this.#hero.receiveShadow = true;
     this.#hero.position.x = this.#highwayLanes[this.#currentLane];
+
+    this.#carSpeed = this.#cars[this.#selectedCar].speed;
+    this.#highwayRotationFactor = Math.cbrt(this.#carSpeed);
+    this.#carSteeringRatio = this.#cars[this.#selectedCar].steeringRatio;
 
     this.#scene.add(this.#hero);
   }
@@ -315,23 +336,35 @@ export default class Game {
     const hemisphereLight = new THREE.HemisphereLight(0x000000, 0xcdc1c5, 2);
     this.#scene.add(hemisphereLight);
 
+    const sunTarget = new THREE.Object3D();
+    sunTarget.position.set(0, 20, 20);
+    this.#scene.add(sunTarget);
+
     const sun = new THREE.DirectionalLight(0xcdc1c5, 0.3);
     sun.castShadow = true;
-    sun.position.set(0, 50, -40);
-    sun.lookAt(new THREE.Vector3(0, 0, 0));
+    sun.position.set(0, 90, -50);
+    sun.target = sunTarget;
+
     this.#scene.add(sun);
 
-    sun.shadow.mapSize.width = 512;
-    sun.shadow.mapSize.height = 512;
-    sun.shadow.camera.near = 0.5;
-    sun.shadow.camera.far = 50;
+    sun.shadowCameraLeft = -20;
+    sun.shadowCameraRight = 20;
+    sun.shadowCameraTop = 20;
+    sun.shadowCameraBottom = -20;
+    sun.shadow.mapSize.width = 256;
+    sun.shadow.mapSize.height = 256;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 500;
   }
 
   #update() {
-    this.#highway.rotation.x += 0.05 / this.#obstacleReleaseInterval;
+    this.#highway.rotation.x +=
+      (0.05 / this.#obstacleReleaseInterval) * this.#highwayRotationFactor;
 
     const delta = this.#clock.getDelta();
-    const interpolationFactor = delta < 0.25 ? delta * 4 : 1;
+
+    const interpolationFactor =
+      delta < 0.25 ? delta * this.#carSteeringRatio : 1;
     this.#hero.position.x = THREE.Math.lerp(
       this.#hero.position.x,
       this.#highwayLanes[this.#currentLane],
@@ -348,9 +381,9 @@ export default class Game {
       this.#clock.start();
 
       this.#addPathObstacle();
-      this.score = this.#score + 1;
+      this.score = this.#score + 1 * this.#carSpeed;
 
-      if (this.#obstacleReleaseInterval > 1.5) {
+      if (this.#obstacleReleaseInterval > 1) {
         this.#obstacleReleaseInterval -= 0.05;
       }
     }
@@ -366,12 +399,14 @@ export default class Game {
   }
 
   #addPathObstacle() {
-    const lane1 = Math.floor(Math.random() * 3);
-    this.#addObstacle(lane1);
+    if (Math.random() > 0.3) {
+      const lane1 = Math.floor(Math.random() * 3);
+      this.#addObstacle(lane1);
 
-    if (Math.random() > 0.5) {
-      const lane2 = (lane1 + Math.floor(Math.random() * 2) + 1) % 3;
-      this.#addObstacle(lane2);
+      if (Math.random() > 0.5) {
+        const lane2 = (lane1 + Math.floor(Math.random() * 2) + 1) % 3;
+        this.#addObstacle(lane2);
+      }
     }
   }
 

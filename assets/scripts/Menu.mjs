@@ -26,7 +26,7 @@ export default class Menu {
   #game;
   #gameDiv;
   #volume = 0.5;
-  #selectedCar = 'nissan-skyline-gtr-r-34';
+  #selectedCar = 'volkswagen-golf-gti';
 
   #gameLoading = false;
 
@@ -97,6 +97,8 @@ export default class Menu {
     this.#mobileRightDirection.addEventListener('click', (event) =>
       this.#handleMobileRightDirectionClick(event)
     );
+
+    this.#handleUnlockCars();
   }
 
   #navigateMenu(destination) {
@@ -179,6 +181,8 @@ export default class Menu {
     this.#bestScoreText.innerHTML = bestScore ?? 0;
     this.#menu.style.display = 'flex';
     this.#navigateMenu('menu-result');
+
+    this.#handleUnlockCars();
   }
 
   #handleMobileLeftDirectionClick(event) {
@@ -187,5 +191,27 @@ export default class Menu {
 
   #handleMobileRightDirectionClick(event) {
     this.#game.rightMove();
+  }
+
+  #unlockCar(carId, carText) {
+    const car = this.#carSelect.querySelector(`#${carId}`);
+    car.disabled = false;
+    car.innerHTML = carText;
+  }
+
+  #handleUnlockCars() {
+    let bestScore = localStorage.getItem('miamiDriveBestScore');
+
+    if (bestScore !== null) {
+      bestScore = Number(bestScore);
+
+      if (bestScore >= 30) {
+        this.#unlockCar('nissan-skyline-gtr-r-34', 'Nissan Skyline GTR R-34');
+      }
+
+      if (bestScore >= 50) {
+        this.#unlockCar('ferrari-enzo', 'Ferrari Enzo');
+      }
+    }
   }
 }

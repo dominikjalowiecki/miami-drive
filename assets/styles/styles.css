@@ -16,6 +16,14 @@ body {
   body {
     font-size: 14px;
   }
+
+  #mobile-control .direction {
+    opacity: 0.15 !important;
+  }
+
+  #mobile-control .direction:hover {
+    opacity: 0.2 !important;
+  }
 }
 
 #menu {
@@ -148,7 +156,7 @@ body {
   width: 50%;
   height: 100%;
   background-color: #000;
-  opacity: 0.15;
+  opacity: 0;
   cursor: pointer;
   transition: opacity 0.3s ease;
   user-select: inherit;
@@ -156,7 +164,7 @@ body {
 }
 
 #mobile-control .direction:hover {
-  opacity: 0.2;
+  opacity: 0.15;
 }
 
 #mobile-control #left-direction::after {
