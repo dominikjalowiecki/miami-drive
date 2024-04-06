@@ -18,11 +18,7 @@ body {
   }
 
   #mobile-control .direction {
-    opacity: 0.15 !important;
-  }
-
-  #mobile-control .direction:hover {
-    opacity: 0.2 !important;
+    display: block !important;
   }
 }
 
@@ -156,15 +152,16 @@ body {
   width: 50%;
   height: 100%;
   background-color: #000;
-  opacity: 0;
+  opacity: 0.15;
   cursor: pointer;
   transition: opacity 0.3s ease;
   user-select: inherit;
   -webkit-tap-highlight-color: inherit;
+  display: none;
 }
 
 #mobile-control .direction:hover {
-  opacity: 0.15;
+  opacity: 0.2;
 }
 
 #mobile-control #left-direction::after {

@@ -52,7 +52,8 @@ export default class Game {
   #camera;
   #renderer;
   #gameStarted = false;
-  #fps = 60;
+  #frameRateMillis = 1000 / 60;
+  #frameStartMillis;
 
   set score(value) {
     this.#score = value;
@@ -197,6 +198,7 @@ export default class Game {
   }
 
   start(selectedCar) {
+    this.#frameStartMillis = performance.now();
     this.score = 0;
     this.#currentLane = 1;
     this.#obstacleReleaseInterval = 3;
@@ -271,7 +273,12 @@ export default class Game {
     this.#camera.position.z = 32;
     this.#camera.rotation.x = THREE.Math.degToRad(5);
 
-    this.#renderer = new THREE.WebGLRenderer();
+    this.#renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      alpha: true,
+      precision: 'lowp',
+      powerPreference: 'low-power',
+    });
     this.#renderer.setClearColor(0xcdc1c5, 1);
     this.#renderer.shadowMap.enabled = true;
     this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -302,6 +309,7 @@ export default class Game {
     obstacleCarModel.position.y = 0;
     obstacleCarModel.position.z = 0;
     obstacleCarModel.rotation.y = THREE.Math.degToRad(180);
+    obstacleCarModel.visible = false;
 
     return obstacleCarModel;
   }
@@ -347,10 +355,10 @@ export default class Game {
 
     this.#scene.add(sun);
 
-    sun.shadowCameraLeft = -20;
-    sun.shadowCameraRight = 20;
-    sun.shadowCameraTop = 20;
-    sun.shadowCameraBottom = -20;
+    sun.shadow.camera.left = -20;
+    sun.shadow.camera.right = 20;
+    sun.shadow.camera.top = 20;
+    sun.shadow.camera.bottom = -20;
     sun.shadow.mapSize.width = 256;
     sun.shadow.mapSize.height = 256;
     sun.shadow.camera.near = 1;
@@ -358,6 +366,11 @@ export default class Game {
   }
 
   #update() {
+    const now = performance.now();
+    if (now - this.#frameStartMillis < this.#frameRateMillis) {
+      return window.requestAnimationFrame(() => this.#update());
+    }
+
     this.#highway.rotation.x +=
       (0.05 / this.#obstacleReleaseInterval) * this.#highwayRotationFactor;
 
@@ -392,9 +405,8 @@ export default class Game {
     this.#render();
 
     if (this.#gameStarted) {
-      setTimeout(() => {
-        window.requestAnimationFrame(() => this.#update());
-      }, 1000 / this.#fps);
+      this.#frameStartMillis = now;
+      return window.requestAnimationFrame(() => this.#update());
     }
   }
 
