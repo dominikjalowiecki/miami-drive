@@ -107,6 +107,9 @@ body {
   font-size: 1rem;
   margin-top: 3rem;
   text-align: center;
+}
+
+.menu-footer a {
   color: #fff;
 }
 

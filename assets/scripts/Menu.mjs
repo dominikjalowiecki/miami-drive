@@ -61,7 +61,7 @@ export default class Menu {
     this.#volumeControl.value = this.#volume;
     this.#sounds = {
       music: new Sound(
-        'assets/sounds/pioneers-tracktribe.mp3',
+        'assets/sounds/miami-drive-ost-Filip-Bury.mp3',
         true,
         this.#volume
       ),
