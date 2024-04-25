@@ -1,22 +1,50 @@
 export default class Game {
   #threeLoader;
   #gltfLoader;
-  #skyGeoTexture;
+  #levels = {
+    morning: {
+      skyGeoTexture: null,
+      fogNearIntensivity: -1000,
+      fogFarIntensivity: 2000,
+      worldIntensivity: 1,
+      sunIntensivity: 0.3,
+      sunPosition: 50,
+    },
+    day: {
+      skyGeoTexture: null,
+      fogNearIntensivity: -600,
+      fogFarIntensivity: 3500,
+      worldIntensivity: 2,
+      sunIntensivity: 0.2,
+      sunPosition: -20,
+    },
+    night: {
+      skyGeoTexture: null,
+      fogNearIntensivity: -1200,
+      fogFarIntensivity: 5500,
+      worldIntensivity: 0.8,
+      sunIntensivity: 0.2,
+      sunPosition: -40,
+    },
+  };
   #cars = {
     'nissan-skyline-gtr-r-34': {
       model: null,
       speed: 2,
       steeringRatio: 6,
+      baseRotation: THREE.Math.degToRad(180),
     },
     'volkswagen-golf-gti': {
       model: null,
       speed: 1,
       steeringRatio: 4,
+      baseRotation: THREE.Math.degToRad(-360),
     },
     'ferrari-enzo': {
       model: null,
       speed: 3,
       steeringRatio: 8,
+      baseRotation: THREE.Math.degToRad(0),
     },
   };
   #highwayLanes = [-5.6, 0, 5.6];
@@ -35,6 +63,7 @@ export default class Game {
   #obstaclesPoolSize = 15;
   #currentLane;
   #selectedCar;
+  #selectedLevel;
 
   #clock;
   #sceneWidth;
@@ -71,13 +100,45 @@ export default class Game {
 
   loadAssets() {
     const promises = [];
-    if (this.#skyGeoTexture === undefined) {
+    if (this.#levels.morning.skyGeoTexture === null) {
+      promises.push(
+        new Promise((resolve, reject) => {
+          this.#threeLoader.load(
+            'assets/skyboxes/AllSkyFree_Sky_EpicBlueSunset_Equirect.png',
+            (data) => {
+              this.#levels.morning.skyGeoTexture = data;
+              resolve();
+            },
+            undefined,
+            (error) => reject(error)
+          );
+        })
+      );
+    }
+
+    if (this.#levels.day.skyGeoTexture === null) {
       promises.push(
         new Promise((resolve, reject) => {
           this.#threeLoader.load(
             'assets/skyboxes/AllSkyFree_Sky_EpicGloriousPink_Equirect.png',
             (data) => {
-              this.#skyGeoTexture = data;
+              this.#levels.day.skyGeoTexture = data;
+              resolve();
+            },
+            undefined,
+            (error) => reject(error)
+          );
+        })
+      );
+    }
+
+    if (this.#levels.night.skyGeoTexture === null) {
+      promises.push(
+        new Promise((resolve, reject) => {
+          this.#threeLoader.load(
+            'assets/skyboxes/AllSkyFree_Sky_MoonBurst_Equirect.png',
+            (data) => {
+              this.#levels.night.skyGeoTexture = data;
               resolve();
             },
             undefined,
@@ -104,7 +165,7 @@ export default class Game {
               model.position.y = this.#cylinderRadius - 1;
               model.position.z = 13;
               model.rotation.x = THREE.Math.degToRad(30);
-              model.rotation.y = THREE.Math.degToRad(-180);
+              model.rotation.y = THREE.Math.degToRad(180);
               this.#cars['nissan-skyline-gtr-r-34'].model = model;
               resolve();
             },
@@ -160,7 +221,7 @@ export default class Game {
               model.position.y = this.#cylinderRadius - 2.2;
               model.position.z = 13;
               model.rotation.x = THREE.Math.degToRad(30);
-              model.rotation.y = THREE.Math.degToRad(-180);
+              model.rotation.y = THREE.Math.degToRad(180);
               this.#cars['volkswagen-golf-gti'].model = model;
               resolve();
             },
@@ -197,12 +258,13 @@ export default class Game {
     return Promise.all(promises);
   }
 
-  start(selectedCar) {
+  start(selectedCar, selectedLevel) {
     this.#frameStartMillis = performance.now();
     this.score = 0;
     this.#currentLane = 1;
     this.#obstacleReleaseInterval = 3;
     this.#selectedCar = selectedCar;
+    this.#selectedLevel = selectedLevel;
     this.#obstaclesPool = [];
     this.#obstaclesInPath = [];
     this.#highway = this.#highwayModel.clone();
@@ -248,11 +310,15 @@ export default class Game {
     this.#sceneWidth = window.innerWidth;
     this.#sceneHeight = window.innerHeight;
     this.#scene = new THREE.Scene();
-    this.#scene.fog = new THREE.FogExp2(0xf0fff0, 0.0008);
+    this.#scene.fog = new THREE.Fog(
+      0xf0fff0,
+      this.#levels[this.#selectedLevel].fogNearIntensivity,
+      this.#levels[this.#selectedLevel].fogFarIntensivity
+    );
 
     const skyGeo = new THREE.SphereGeometry(800, 24, 24);
     const skyGeoMaterial = new THREE.MeshPhongMaterial({
-      map: this.#skyGeoTexture,
+      map: this.#levels[this.#selectedLevel].skyGeoTexture,
     });
     this.#sky = new THREE.Mesh(skyGeo, skyGeoMaterial);
     this.#sky.material.side = THREE.BackSide;
@@ -329,6 +395,7 @@ export default class Game {
     } else {
       this.#hero = this.#cars[this.#selectedCar].model;
     }
+
     this.#hero.castShadow = true;
     this.#hero.receiveShadow = true;
     this.#hero.position.x = this.#highwayLanes[this.#currentLane];
@@ -341,16 +408,23 @@ export default class Game {
   }
 
   #addLight() {
-    const hemisphereLight = new THREE.HemisphereLight(0x000000, 0xcdc1c5, 2);
+    const hemisphereLight = new THREE.HemisphereLight(
+      0x000000,
+      0xcdc1c5,
+      this.#levels[this.#selectedLevel].worldIntensivity
+    );
     this.#scene.add(hemisphereLight);
 
     const sunTarget = new THREE.Object3D();
     sunTarget.position.set(0, 20, 20);
     this.#scene.add(sunTarget);
 
-    const sun = new THREE.DirectionalLight(0xcdc1c5, 0.3);
+    const sun = new THREE.DirectionalLight(
+      0xcdc1c5,
+      this.#levels[this.#selectedLevel].sunIntensivity
+    );
     sun.castShadow = true;
-    sun.position.set(0, 90, -50);
+    sun.position.set(0, 90, this.#levels[this.#selectedLevel].sunPosition);
     sun.target = sunTarget;
 
     this.#scene.add(sun);
@@ -359,8 +433,8 @@ export default class Game {
     sun.shadow.camera.right = 20;
     sun.shadow.camera.top = 20;
     sun.shadow.camera.bottom = -20;
-    sun.shadow.mapSize.width = 256;
-    sun.shadow.mapSize.height = 256;
+    sun.shadow.mapSize.width = 512;
+    sun.shadow.mapSize.height = 512;
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 500;
   }
@@ -377,7 +451,26 @@ export default class Game {
     const delta = this.#clock.getDelta();
 
     const interpolationFactor =
-      delta < 0.25 ? delta * this.#carSteeringRatio : 1;
+      delta < 0.25 &&
+      Math.abs(this.#highwayLanes[this.#currentLane] - this.#hero.position.x) >
+        0.01
+        ? delta * this.#carSteeringRatio
+        : 1;
+
+    const baseRotation = this.#cars[this.#selectedCar].baseRotation;
+    if (this.#hero.position.x === this.#highwayLanes[this.#currentLane]) {
+      this.#hero.rotation.y = baseRotation;
+    } else {
+      this.#hero.rotation.y =
+        baseRotation -
+        THREE.Math.degToRad(
+          (baseRotation < 0 ? -1 : 1) *
+            15 *
+            ((this.#highwayLanes[this.#currentLane] - this.#hero.position.x) /
+              11.2)
+        );
+    }
+
     this.#hero.position.x = THREE.Math.lerp(
       this.#hero.position.x,
       this.#highwayLanes[this.#currentLane],

@@ -27,6 +27,7 @@ export default class Menu {
   #gameDiv;
   #volume = 0.5;
   #selectedCar = 'volkswagen-golf-gti';
+  #availableLevels = ['morning', 'day', 'night'];
 
   #gameLoading = false;
 
@@ -134,7 +135,9 @@ export default class Menu {
             this.#game
               .loadAssets()
               .then(() => {
-                this.#game.start(this.#selectedCar);
+                const selectedLevel =
+                  this.#availableLevels[Math.floor(Math.random() * 3)];
+                this.#game.start(this.#selectedCar, selectedLevel);
                 this.#menu.style.display = 'none';
                 this.gameLoading = false;
               })
