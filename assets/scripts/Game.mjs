@@ -541,15 +541,16 @@ export default class Game {
     newObstacle.rotation.x = -this.#highway.rotation.x;
 
     newObstacle.visible = true;
+    newObstacle.updateMatrix();
   }
 
   #obstacleLogic() {
-    const obstaclePosition = new THREE.Vector3();
     const obstaclesToRemove = [];
 
     for (const obstacle of this.#obstaclesInPath) {
-      obstaclePosition.setFromMatrixPosition(obstacle.matrixWorld);
       if (obstacle.visible) {
+        const obstaclePosition = new THREE.Vector3();
+        obstaclePosition.setFromMatrixPosition(obstacle.matrixWorld);
         if (obstaclePosition.z > 20) {
           obstaclesToRemove.push(obstacle);
         } else {
